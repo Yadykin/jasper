@@ -1,3 +1,25 @@
+# JasPer with GeoJP2
+This is modified **JasPer** library to build **GDAL JPEG2000** driver
+(http://www.gdal.org/frmt_jpeg2000.html) with **GeoJP2** (http://fileformats.archiveteam.org/wiki/GeoJP2) support enabled.
+Modified version from original GDAL page is too old.
+It can be downloaded [here](http://download.osgeo.org/gdal/jasper-1.900.1.uuid.tar.gz).
+
+**WARNING**
+
+For normal build of GDAL with current version of JasPer library you
+ need to modify /frmts/jpeg2000/jpeg2000dataset.cpp file of GDAL
+ source code.
+ You need to remove the code block starts from line 49 up to line 189.
+ This code block is bordered by the following lines:
+
+ >// XXX: Part of code below extracted from the JasPer internal headers
+ 
+ >...
+ 
+ >// XXX: End of JasPer header.
+
+# Original JasPer ReadMe
+
 JasPer Image Processing/Coding Tool Kit
 
 This is the source distribution for JasPer.  JasPer is a collection
@@ -50,4 +72,5 @@ URL and click on the "New issue" button:
 Please do not submit bug reports directly to the author via email,
 as bug reports that are not submitted via the above issue-tracking
 system on GitHub are easy to be lost.
+
 
