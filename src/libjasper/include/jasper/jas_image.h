@@ -80,6 +80,7 @@
 #include <jasper/jas_stream.h>
 #include <jasper/jas_seq.h>
 #include <jasper/jas_cm.h>
+#include <jasper/jp2_cod.h>
 #include <stdio.h>
 
 #ifdef __cplusplus
@@ -549,16 +550,17 @@ int bmp_validate(jas_stream_t *in);
 
 #if !defined(EXCLUDE_JP2_SUPPORT)
 /* Format-dependent operations for JP2 support. */
-jas_image_t *jp2_decode(jas_stream_t *in, const char *optstr);
-int jp2_encode(jas_image_t *image, jas_stream_t *out, const char *optstr);
-int jp2_validate(jas_stream_t *in);
+JAS_DLLEXPORT jas_image_t *jp2_decode(jas_stream_t *in, const char *optstr);
+JAS_DLLEXPORT int jp2_encode(jas_image_t *image, jas_stream_t *out, const char *optstr);
+JAS_DLLEXPORT int jp2_validate(jas_stream_t *in);
+JAS_DLLEXPORT int jp2_encode_uuid(jas_image_t *image, jas_stream_t *out, const char *optstr, jp2_box_t *uuid);
 #endif
 
 #if !defined(EXCLUDE_JPC_SUPPORT)
 /* Format-dependent operations for JPEG-2000 code stream support. */
-jas_image_t *jpc_decode(jas_stream_t *in, const char *optstr);
-int jpc_encode(jas_image_t *image, jas_stream_t *out, const char *optstr);
-int jpc_validate(jas_stream_t *in);
+JAS_DLLEXPORT jas_image_t *jpc_decode(jas_stream_t *in, const char *optstr);
+JAS_DLLEXPORT int jpc_encode(jas_image_t *image, jas_stream_t *out, const char *optstr);
+JAS_DLLEXPORT int jpc_validate(jas_stream_t *in);
 #endif
 
 #if !defined(EXCLUDE_PGX_SUPPORT)

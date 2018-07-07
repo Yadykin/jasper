@@ -1283,11 +1283,11 @@ static int jpc_dec_process_siz(jpc_dec_t *dec, jpc_ms_t *ms)
 		}
 	}
 
-	if (dec->max_samples > 0 && num_samples > dec->max_samples) {
+	/*if (dec->max_samples > 0 && num_samples > dec->max_samples) {
 		jas_eprintf("maximum number of samples exceeded (%zu > %zu)\n",
 		  num_samples, dec->max_samples);
 		return -1;
-	}
+	}*/
 
 	dec->image = 0;
 

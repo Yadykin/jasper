@@ -23,6 +23,7 @@ set(libjasper_headers
 	include/jasper/jas_tvp.h
 	include/jasper/jas_types.h
 	include/jasper/jas_version.h
+	include/jasper/jp2_cod.h
 )
 
 set(libjasper_base_sources
@@ -144,12 +145,6 @@ target_include_directories(libjasper BEFORE PRIVATE
 
 set_target_properties(libjasper PROPERTIES OUTPUT_NAME jasper)
 set_target_properties(libjasper PROPERTIES LINKER_LANGUAGE C)
-
-if (MSVC)
-	target_compile_definitions(libjasper PRIVATE "-D_CRT_SECURE_NO_WARNINGS")
-	target_compile_definitions(libjasper PRIVATE "-D_CRT_SECURE_NO_DEPRECATE")
-	target_compile_definitions(libjasper PRIVATE "-D_CRT_NONSTDC_NO_DEPRECATE")
-endif()
 
 if (UNIX)
 	set_target_properties(libjasper PROPERTIES

@@ -78,7 +78,7 @@
 #include "jasper/jas_malloc.h"
 #include "jasper/jas_debug.h"
 
-#include "jp2_cod.h"
+#include "jasper/jp2_cod.h"
 
 /******************************************************************************\
 * Function prototypes.
@@ -127,6 +127,9 @@ static void jp2_pclr_destroy(jp2_box_t *box);
 static int jp2_pclr_getdata(jp2_box_t *box, jas_stream_t *in);
 static int jp2_pclr_putdata(jp2_box_t *box, jas_stream_t *out);
 static void jp2_pclr_dumpdata(jp2_box_t *box, FILE *out);
+static void jp2_uuid_destroy(jp2_box_t *box);
+static int jp2_uuid_getdata(jp2_box_t *box, jas_stream_t *in);
+static int jp2_uuid_putdata(jp2_box_t *box, jas_stream_t *out);
 
 /******************************************************************************\
 * Local data.
@@ -164,7 +167,7 @@ jp2_boxinfo_t jp2_boxinfos[] = {
 	{JP2_BOX_XML, "XML", 0,
 	  {0, 0, 0, 0, 0}},
 	{JP2_BOX_UUID, "UUID", 0,
-	  {0, 0, 0, 0, 0}},
+	  {0, jp2_uuid_destroy, jp2_uuid_getdata, jp2_uuid_putdata, 0}},
 	{JP2_BOX_UINF, "UINF", JP2_BOX_SUPER,
 	  {0, 0, 0, 0, 0}},
 	{JP2_BOX_ULST, "ULST", 0,
@@ -288,7 +291,7 @@ jp2_box_t *jp2_box_get(jas_stream_t *in)
 	} else {
 		box->datalen = box->len - JP2_BOX_HDRLEN(false);
 	}
-	if (box->len != 0 && box->len < 8) {
+	if (box->len != 0 && box->len < JP2_BOX_HDRLEN(false)) {
 		goto error;
 	}
 
@@ -903,6 +906,56 @@ static void jp2_pclr_dumpdata(jp2_box_t *box, FILE *out)
 			  pclr->lutdata[i * pclr->numchans + j]);
 		}
 	}
+}
+
+static void jp2_uuid_destroy(jp2_box_t *box)
+{
+	jp2_uuid_t *uuid = &box->data.uuid;
+	if (uuid->data)
+	{
+	    jas_free(uuid->data);
+	    uuid->data = NULL;
+	}
+}
+
+static int jp2_uuid_getdata(jp2_box_t *box, jas_stream_t *in)
+{
+	jp2_uuid_t *uuid = &box->data.uuid;
+	int i;
+	
+	for (i = 0; i < 16; i++)
+	{
+	    if (jp2_getuint8(in, &uuid->uuid[i]))
+		return -1;
+	}
+	
+	uuid->datalen = box->datalen - 16;
+	uuid->data = jas_malloc(uuid->datalen * sizeof(uint_fast8_t));
+	for (i = 0; i < uuid->datalen; i++)
+	{
+	    if (jp2_getuint8(in, &uuid->data[i]))
+		return -1;
+	}
+	return 0;
+}
+
+static int jp2_uuid_putdata(jp2_box_t *box, jas_stream_t *out)
+{
+	jp2_uuid_t *uuid = &box->data.uuid;
+	int i;
+	
+	for (i = 0; i < 16; i++)
+	{
+	    if (jp2_putuint8(out, uuid->uuid[i]))
+		return -1;
+	}
+	
+	for (i = 0; i < uuid->datalen; i++)
+	{
+	    if (jp2_putuint8(out, uuid->data[i]))
+		return -1;
+	}
+	return 0;
 }
 
 static int jp2_getint(jas_stream_t *in, int s, int n, int_fast32_t *val)

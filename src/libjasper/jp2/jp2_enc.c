@@ -78,7 +78,7 @@
 #include "jasper/jas_cm.h"
 #include "jasper/jas_icc.h"
 #include "jasper/jas_debug.h"
-#include "jp2_cod.h"
+#include "jasper/jp2_cod.h"
 
 static uint_fast32_t jp2_gettypeasoc(int colorspace, int ctype);
 static int clrspctojp2(jas_clrspc_t clrspc);
@@ -87,7 +87,7 @@ static int clrspctojp2(jas_clrspc_t clrspc);
 * Functions.
 \******************************************************************************/
 
-int jp2_encode(jas_image_t *image, jas_stream_t *out, const char *optstr)
+int jp2_write_header(jas_image_t *image, jas_stream_t *out)
 {
 	jp2_box_t *box;
 	jp2_ftyp_t *ftyp;
@@ -98,8 +98,6 @@ int jp2_encode(jas_image_t *image, jas_stream_t *out, const char *optstr)
 	long len;
 	uint_fast16_t cmptno;
 	jp2_colr_t *colr;
-	char buf[4096];
-	uint_fast32_t overhead;
 	jp2_cdefchan_t *cdefchanent;
 	jp2_cdef_t *cdef;
 	int i;
@@ -372,6 +370,31 @@ int jp2_encode(jas_image_t *image, jas_stream_t *out, const char *optstr)
 	jas_stream_close(tmpstream);
 	tmpstream = 0;
 
+	return 0;
+	abort();
+
+error:
+	if (iccprof) {
+		jas_iccprof_destroy(iccprof);
+	}
+	if (iccstream) {
+		jas_stream_close(iccstream);
+	}
+	if (box) {
+		jp2_box_destroy(box);
+	}
+	if (tmpstream) {
+		jas_stream_close(tmpstream);
+	}
+	return -1;
+}
+
+int jp2_write_codestream(jas_image_t *image, jas_stream_t *out, const char *optstr)
+{
+	jp2_box_t *box;
+	char buf[4096];
+	uint_fast32_t overhead;
+
 	/*
 	 * Output the contiguous code stream box.
 	 */
@@ -402,20 +425,35 @@ int jp2_encode(jas_image_t *image, jas_stream_t *out, const char *optstr)
 	return 0;
 
 error:
-
-	if (iccprof) {
-		jas_iccprof_destroy(iccprof);
-	}
-	if (iccstream) {
-		jas_stream_close(iccstream);
-	}
 	if (box) {
 		jp2_box_destroy(box);
 	}
-	if (tmpstream) {
-		jas_stream_close(tmpstream);
-	}
 	return -1;
+}
+
+int jp2_encode(jas_image_t *image, jas_stream_t *out, const char *optstr)
+{
+	if (jp2_write_header(image, out) < 0)
+		return -1;
+	if (jp2_write_codestream(image, out, optstr) < 0)
+		return -1;
+
+	return 0;
+}
+
+int jp2_encode_uuid(jas_image_t *image, jas_stream_t *out,
+		    const char *optstr, jp2_box_t *uuid)
+{
+	if (jp2_write_header(image, out) < 0)
+		return -1;
+	if (uuid) {
+		if (jp2_box_put(uuid, out))
+			return -1;
+	}
+	if (jp2_write_codestream(image, out, optstr) < 0)
+		return -1;
+
+	return 0;
 }
 
 static uint_fast32_t jp2_gettypeasoc(int colorspace, int ctype)

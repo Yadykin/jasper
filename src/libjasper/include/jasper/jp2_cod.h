@@ -70,11 +70,17 @@
 #ifndef JP2_COD_H
 #define JP2_COD_H
 
+#include <jasper/jas_config.h>
+
 /******************************************************************************\
 * Includes.
 \******************************************************************************/
 
 #include "jasper/jas_types.h"
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 /******************************************************************************\
 * Macros.
@@ -229,6 +235,12 @@ typedef struct {
 	jp2_cmapent_t *ents;
 } jp2_cmap_t;
 
+typedef struct {
+	uint_fast32_t datalen;
+	uint_fast8_t uuid[16];
+	uint_fast8_t *data;
+} jp2_uuid_t;
+
 #define	JP2_CMAP_DIRECT		0
 #define	JP2_CMAP_PALETTE	1
 
@@ -257,6 +269,7 @@ typedef struct {
 		jp2_pclr_t pclr;
 		jp2_cdef_t cdef;
 		jp2_cmap_t cmap;
+		jp2_uuid_t uuid;
 	} data;
 
 } jp2_box_t;
@@ -284,10 +297,10 @@ typedef struct jp2_boxinfo_s {
 * Box class.
 \******************************************************************************/
 
-jp2_box_t *jp2_box_create(int type);
-void jp2_box_destroy(jp2_box_t *box);
-jp2_box_t *jp2_box_get(jas_stream_t *in);
-int jp2_box_put(jp2_box_t *box, jas_stream_t *out);
+JAS_DLLEXPORT jp2_box_t *jp2_box_create(int type);
+JAS_DLLEXPORT void jp2_box_destroy(jp2_box_t *box);
+JAS_DLLEXPORT jp2_box_t *jp2_box_get(jas_stream_t *in);
+JAS_DLLEXPORT int jp2_box_put(jp2_box_t *box, jas_stream_t *out);
 
 #define JP2_DTYPETOBPC(dtype) \
   ((JAS_IMAGE_CDT_GETSGND(dtype) << 7) | (JAS_IMAGE_CDT_GETPREC(dtype) - 1))
@@ -300,5 +313,8 @@ int jp2_box_put(jp2_box_t *box, jas_stream_t *out);
 
 jp2_cdefchan_t *jp2_cdef_lookup(jp2_cdef_t *cdef, int channo);
 
+#ifdef __cplusplus
+}
+#endif
 
 #endif
